@@ -88,6 +88,17 @@ apptainer run --nv instance://ollama serve
 apptainer run --nv instance://ollama run qwen3:14b
 
 ```
+**Summary of Commands**
+```bash
+mkdir -p /data/datasets/$USER
+cd /data/datasets/$USER
+# srun -t 3:00:00 -p compute --pty /bin/bash
+mkdir -p /data/datasets/$USER/.cache
+apptainer pull docker://ollama/ollama:latest
+mkdir -p models
+apptainer instance run --nv --bind models:/models --env "OLLAMA_MODELS=/models" ollama_latest.sif ollama start
+apptainer run --nv instance://ollama pull qwen3:14b
+```
 
 ---
 
