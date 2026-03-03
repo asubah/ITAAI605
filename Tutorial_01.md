@@ -82,7 +82,7 @@ For this tutorial, we are using the `qwen3:14b` model.
 apptainer run --nv instance://ollama pull qwen3:14b
 
 # Serve the model (ensures the API is actively listening)
-apptainer run --nv instance://ollama serve qwen3:14b
+apptainer run --nv instance://ollama serve
 
 # Alternatively, to run the model interactively in the terminal:
 apptainer run --nv instance://ollama run qwen3:14b
