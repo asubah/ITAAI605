@@ -101,6 +101,12 @@ apptainer instance run --nv --bind models:/models --env "OLLAMA_MODELS=/models" 
 apptainer run --nv instance://ollama pull qwen3:14b
 ```
 
+**A Script to Use**
+After you get an allocation using `srun`, you can run the following script to start an ollama server on the hayrat cluster.
+```bash
+/data/datasets/public_asubah/start_ollama.sh
+```
+
 ---
 
 ## 5. Exposing the API for Local Consumption (Ngrok)
