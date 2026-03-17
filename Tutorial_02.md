@@ -31,7 +31,7 @@ Now, we will send this quote to OpenRouter using n8n's dedicated AI integration.
 4. Search for and select the **OpenRouter Chat Model** node.
 5. Configure the OpenRouter Chat Model node:
    * **Credential:** Click the dropdown, select **Create New Credential**, and paste your OpenRouter API Key. Save and close the credential window.
-   * **Model:** Select a free model from the dropdown (for example, `meta-llama/llama-3-8b-instruct:free`). *If it isn't listed, hover over the field, set it to "Expression", and paste the model name.*
+   * **Model:** Select a free model from the dropdown (for example, `openrouter/free`). *If it isn't listed, hover over the field, set it to "Expression", and paste the model name.*
 6. Click back into the **Basic LLM Chain** node settings.
 7. In the **Prompt** field, paste the following text. Notice how we use n8n's expression syntax (`{{ $json.quote }}`) to dynamically insert the data from the previous HTTP Request node:
    > You are a philosophical assistant. Please translate the following quote to Arabic, and then explain its core meaning in one simple sentence. The quote is: '{{ $json.quote }}' by {{ $json.author }}.
