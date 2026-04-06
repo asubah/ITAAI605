@@ -1,10 +1,10 @@
 # Tutorial 3: Building an AI-Powered ETL Pipeline (Extract, Transform, Load)
 
-**Objective:** Learn how to build a stateful automation pipeline. You will extract live news data, use a Large Language Model (LLM) to transform and analyze the text, and load the structured results into a persistent database using n8n Data Tables.
+**Objective:** Learn how to build a stateful automation pipeline. You will extract live news data, use a locally hosted Large Language Model (LLM) to transform and analyze the text into structured JSON, and load the results into a persistent database using n8n Data Tables.
 
 **Prerequisites:**
 * Access to your n8n environment.
-* Your personal OpenRouter API Key.
+* A running instance of **Ollama** with a model pulled (e.g., `llama3.2:latest`).
 * A free API key from [NewsAPI.org](https://newsapi.org/) (takes 1 minute to generate).
 
 ## Step 1: Create the Destination (Data Table)
@@ -23,27 +23,47 @@ We will pull the latest articles about High-Performance Computing.
 2. Click the **+** icon and add an **HTTP Request** node.
 3. Configure the node:
    * **Method:** `GET`
-   * **URL:** `https://newsapi.org/v2/everything?q="High-Performance Computing"&pageSize=3&apiKey=YOUR_NEWS_API_KEY` *(Replace with your actual key)*.
-4. Click **Execute Node**. The output will contain an `articles` array. 
-5. Add an **Item Lists** node (or **Split Out** node in newer n8n versions) directly after the HTTP Request. Configure it to split the `articles` array so n8n processes each news article as a separate item.
+   * **URL:** `https://newsapi.org/v2/everything?q="High-Performance Computing"&pageSize=10&apiKey=YOUR_NEWS_API_KEY` *(Replace with your actual key)*.
+4. Click **Execute Node**. The output will contain an `articles` array containing 10 recent news items.
+5. Add a **Split Out** node directly after the HTTP Request. 
+   * **Field To Split Out:** Type `articles`.
+   * This ensures n8n processes each of the 10 news articles as a separate, individual item moving forward.
 
-## Step 3: Transform (AI Processing)
-Now, we instruct the AI to read each article and extract specific insights.
-1. Add a **Basic LLM Chain** node after your Item Lists node.
-2. Attach an **OpenRouter Chat Model** to the **Model** input of the LLM Chain. Select your credential and a free model (e.g., `openrouter/free`).
-3. In the **Basic LLM Chain** node settings, paste the following into the **Prompt** field:
-   > Analyze the following news article: Title: '{{ $json.title }}'. Description: '{{ $json.description }}'.
-   > 1. Provide a concise 1-sentence summary.
-   > 2. Determine the sentiment of the news (Positive, Neutral, or Negative).
-   > Output your response exactly like this: Summary: [your summary] | Sentiment: [your sentiment]
+## Step 3: Transform (AI Processing & Structured Output)
+Now, we instruct the AI to read each article. Unlike previous tutorials where we hoped the AI would format its text nicely, we will now *force* it to output structured JSON data so our database can read it cleanly.
+
+1. Add a **Basic LLM Chain** node after your Split Out node.
+2. **Connect the Model:** Click the **+** icon on the `Model` input of the LLM Chain and attach an **Ollama Chat Model**. 
+   * Configure your Ollama credentials.
+   * **Model:** `llama3.2:latest` (or whichever model you have pulled).
+   * **Options:** Click Add Option, select **Format**, and choose `json`.
+   3. **Connect the Output Parser:** Click the **+** icon on the `Output Parser` input (bottom left of the LLM Chain) and attach a **Structured Output Parser** node. 
+   * In the parser's settings, paste the following JSON Schema Example. This acts as a strict template for the LLM:
+     ```json
+     {
+       "URL": "https://www.example.com",
+       "Title": "News Article Title",
+       "Summary": "One sentence article summary",
+       "Sentiment": "Positive"
+     }
+     ```
+   4. **Configure the Prompt:** Click back into the **Basic LLM Chain** node settings. Notice how we no longer need to manually beg the AI to format its text. We just define the task:
+   > Analyze the following news article:
+   > - Provide a concise 1-sentence summary.
+   > - Determine the sentiment of the news (Positive, Neutral, or Negative).
+   > 
+   > Title: '{{ $json.title }}'. Description: '{{ $json.description }}'. URL: {{ $json.url }}.
 
 ## Step 4: Load (Persist Data)
-Finally, we save the AI's analysis to our table.
+Finally, we save the perfectly structured AI analysis to our table.
 1. Add an **n8n Data Table** node after the LLM Chain.
 2. Configure it as follows:
-   * **Resource:** `Row`
-   * **Operation:** `Upsert` (This prevents duplicate entries if you run the workflow twice).
+   * **Operation:** `Insert row` (or `Upsert` to prevent duplicates on multiple runs).
    * **Data Table:** Select `HPC_News_Vault`.
-   * **Match Column:** Select `URL`. 
-3. Map the fields. For the `URL` and `Title`, use expressions to pull from the original article data. For `Summary` and `Sentiment`, map the text output generated by the LLM node.
+   * **Columns -> Mapping Mode:** Select `Define Below`.
+3. Because we used the Structured Output Parser, the AI's response is neatly tucked inside an `output` object. Map the fields exactly like this using expressions:
+   * **URL:** `{{ $json.output.URL }}`
+   * **Title:** `{{ $json.output.Title }}`
+   * **Summary:** `{{ $json.output.Summary }}`
+   * **Sentiment:** `{{ $json.output.Sentiment }}`
 4. Click **Execute Workflow** and check your Data Table in the left menu to see the populated records!
