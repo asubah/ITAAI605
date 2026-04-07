@@ -1,11 +1,3 @@
-This is an excellent workflow to introduce your students to one of the most powerful concepts in modern AI engineering: **RAG (Retrieval-Augmented Generation)**. 
-
-Since your students are undergraduate computer science majors, they already understand standard databases (like SQL). This tutorial will bridge their existing knowledge to how AI handles unstructured data (like PDFs and text files).
-
-Here is the tutorial formatted for your class, explaining the core concepts before diving into the node-by-node breakdown.
-
-***
-
 # Tutorial 5: Building a Custom AI Knowledge Base (RAG)
 
 **Objective:** Learn how to teach an AI about your own private documents. You will build a system that reads an uploaded file, converts the text into a mathematical format the AI can understand, and allows users to chat with the document using an AI Agent.
