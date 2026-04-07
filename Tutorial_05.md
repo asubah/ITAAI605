@@ -9,7 +9,7 @@
 
 ---
 
-## 🧠 Core Concepts: What is RAG?
+## Core Concepts: What is RAG?
 Large Language Models (LLMs) are like smart students who have read the whole internet, but they haven't read *your* specific, private files. **RAG (Retrieval-Augmented Generation)** is the process of giving the AI an "open-book exam." Instead of relying on its memory, we give it a search engine to look up answers in your documents before it speaks.
 
 To make this work, we need to understand three new concepts:
